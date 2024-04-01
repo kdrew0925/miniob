@@ -14,7 +14,9 @@ See the Mulan PSL v2 for more details. */
 
 #include <limits.h>
 #include <string.h>
+
 #include <algorithm>
+
 
 #include "common/defs.h"
 #include "storage/table/table.h"
@@ -126,6 +128,7 @@ RC Table::create(int32_t table_id,
   return rc;
 }
 
+<<<<<<< HEAD
 RC Table::drop()
 {
   RC rc = sync();  // 刷新所有脏页（磁盘中数据页的副本，便于直接进行读写，但是数据页可以存在不同）
@@ -163,6 +166,7 @@ RC Table::drop()
   // 上述三个文件全部删除，即表完成删除
   return RC::SUCCESS;
 }
+
 
 
 RC Table::open(const char *meta_file, const char *base_dir)

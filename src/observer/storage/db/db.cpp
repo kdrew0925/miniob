@@ -101,6 +101,7 @@ RC Db::create_table(const char *table_name, int attribute_count, const AttrInfoS
   return RC::SUCCESS;
 }
 
+
 RC Db::drop_table(const char* table_name)
 {
     RC rc = RC::SUCCESS;
@@ -122,7 +123,6 @@ RC Db::drop_table(const char* table_name)
     delete table;
     return RC::SUCCESS;
 }
-
 
 Table *Db::find_table(const char *table_name) const
 {
