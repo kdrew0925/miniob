@@ -14,16 +14,6 @@ See the Mulan PSL v2 for more details. */
 
 #include "common/log/log.h"
 #include "sql/stmt/stmt.h"
-#include "sql/stmt/calc_stmt.h"
-#include "sql/stmt/create_index_stmt.h"
-#include "sql/stmt/create_table_stmt.h"
-#include "sql/stmt/delete_stmt.h"
-#include "sql/stmt/desc_table_stmt.h"
-#include "sql/stmt/drop_table_stmt.h"
-#include "sql/stmt/exit_stmt.h"
-#include "sql/stmt/explain_stmt.h"
-#include "sql/stmt/help_stmt.h"
->>>>>>> 4db8a764316886f830acfe1e1c25bdba7b2d0451
 #include "sql/stmt/insert_stmt.h"
 #include "sql/stmt/delete_stmt.h"
 #include "sql/stmt/select_stmt.h"

@@ -1,14 +1,11 @@
 #pragma once
 
-
 #include<string>
 #include<vector>
-
 
 #include "sql/stmt/stmt.h"
 
 class Db;
-
 
 class DropTableStmt : public Stmt
 {
@@ -25,5 +22,4 @@ class DropTableStmt : public Stmt
 
     private:
         std::string table_name_;
-
 };

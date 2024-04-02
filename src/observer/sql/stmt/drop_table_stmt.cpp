@@ -1,5 +1,4 @@
 #include "sql/stmt/drop_table_stmt.h"
-
 #include  "event/sql_debug.h"
 
 RC DropTableStmt::create(Db *db,const DropTableSqlNode &drop_table,Stmt *&stmt)
