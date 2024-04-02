@@ -109,7 +109,6 @@ COMMIT                                  RETURN_TOKEN(TRX_COMMIT);
 ROLLBACK                                RETURN_TOKEN(TRX_ROLLBACK);
 INT                                     RETURN_TOKEN(INT_T);
 CHAR                                    RETURN_TOKEN(STRING_T);
-DATE                                    RETURN_TOKEN(DATE_T);
 FLOAT                                   RETURN_TOKEN(FLOAT_T);
 LOAD                                    RETURN_TOKEN(LOAD);
 DATA                                    RETURN_TOKEN(DATA);
@@ -132,17 +131,6 @@ EXPLAIN                                 RETURN_TOKEN(EXPLAIN);
 "-" |
 "*" |
 "/"                                     { return yytext[0]; }
-
-\"[0-9]{4}-[0-9]{2}-[0-9]{2}\"          yylval->string = strdup(yytext); RETURN_TOKEN(DATE_STR);
-\"[0-9]{4}-[0-9]{1}-[0-9]{2}\"          yylval->string = strdup(yytext); RETURN_TOKEN(DATE_STR);
-\"[0-9]{4}-[0-9]{2}-[0-9]{1}\"          yylval->string = strdup(yytext); RETURN_TOKEN(DATE_STR);
-\"[0-9]{4}-[0-9]{1}-[0-9]{1}\"          yylval->string = strdup(yytext); RETURN_TOKEN(DATE_STR);
-\'[0-9]{4}-[0-9]{2}-[0-9]{2}\'          yylval->string = strdup(yytext); RETURN_TOKEN(DATE_STR);
-\'[0-9]{4}-[0-9]{1}-[0-9]{2}\'          yylval->string = strdup(yytext); RETURN_TOKEN(DATE_STR);
-\'[0-9]{4}-[0-9]{2}-[0-9]{1}\'          yylval->string = strdup(yytext); RETURN_TOKEN(DATE_STR);
-\'[0-9]{4}-[0-9]{1}-[0-9]{1}\'          yylval->string = strdup(yytext); RETURN_TOKEN(DATE_STR);
-
-
 \"[^"]*\"                               yylval->string = strdup(yytext); RETURN_TOKEN(SSS);
 '[^']*\'                                yylval->string = strdup(yytext); RETURN_TOKEN(SSS);
 

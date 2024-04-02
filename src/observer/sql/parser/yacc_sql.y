@@ -40,17 +40,6 @@ ArithmeticExpr *create_arithmetic_expression(ArithmeticExpr::Type type,
   expr->set_name(token_name(sql_string, llocp));
   return expr;
 }
-//寻找年月日相对应字符
-int find(const char *s,int b,const char *t)
-{
-  int i;
-  for(i=b;i<strlen(s);i++){
-    if(s[i]==*t)
-    return i;
-  }
-  return -1;
-}
-
 
 %}
 
@@ -88,7 +77,6 @@ int find(const char *s,int b,const char *t)
         INT_T
         STRING_T
         FLOAT_T
-        DATE_T
         HELP
         EXIT
         DOT //QUOTE
@@ -133,7 +121,6 @@ int find(const char *s,int b,const char *t)
 %token <number> NUMBER
 %token <floats> FLOAT
 %token <string> ID
-%token <string> DATE_STR
 %token <string> SSS
 //非终结符
 
@@ -305,6 +292,7 @@ create_table_stmt:    /*create table 语句的语法解析树*/
 
       if (src_attrs != nullptr) {
         create_table.attr_infos.swap(*src_attrs);
+        delete src_attrs;
       }
       create_table.attr_infos.emplace_back(*$5);
       std::reverse(create_table.attr_infos.begin(), create_table.attr_infos.end());
@@ -353,7 +341,6 @@ type:
     INT_T      { $$=INTS; }
     | STRING_T { $$=CHARS; }
     | FLOAT_T  { $$=FLOATS; }
-    | DATE_T   { $$=DATES; }
     ;
 insert_stmt:        /*insert   语句的语法解析树*/
     INSERT INTO ID VALUES LBRACE value value_list RBRACE 
@@ -362,6 +349,7 @@ insert_stmt:        /*insert   语句的语法解析树*/
       $$->insertion.relation_name = $3;
       if ($7 != nullptr) {
         $$->insertion.values.swap(*$7);
+        delete $7;
       }
       $$->insertion.values.emplace_back(*$6);
       std::reverse($$->insertion.values.begin(), $$->insertion.values.end());
@@ -398,18 +386,7 @@ value:
       char *tmp = common::substr($1,1,strlen($1)-2);
       $$ = new Value(tmp);
       free(tmp);
-    }
-    |DATE_STR{
-        int p1=find($1,1,"-");
-        int p2=find($1,p1+1,"-");
-        char *y=common::substr($1,1,p1-1);
-        char *m=common::substr($1,p1+1,p2-1);
-        char *d=common::substr($1,p2+1,strlen($1)-2);
-        $$=new Value(y,m,d);
-      free(y);
-      free(m);
-      free(d);
-
+      free($1);
     }
     ;
     

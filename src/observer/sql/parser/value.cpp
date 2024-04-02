@@ -12,27 +12,17 @@ See the Mulan PSL v2 for more details. */
 // Created by WangYunlai on 2023/06/28.
 //
 
-#include <sstream>
 #include "sql/parser/value.h"
-#include "storage/field/field.h"
-#include "common/log/log.h"
 #include "common/lang/comparator.h"
 #include "common/lang/string.h"
+#include "common/log/log.h"
+#include <sstream>
 
-const char *ATTR_TYPE_NAME[] = {"undefined", "chars", "ints", "floats", "booleans","date"};
-
-int check_date(int year,int month,int day){
-  static int mon[]={0,31,28,31,30,31,30,31,31,30,31,30,31};
-  bool leap=(year%400==0||(year%100&&year%4==0));
-  if(year>0&&(month>0)&&(month<=12)&&(day>0)&&(day<=((month==2&&leap)?1:0)+mon[month]))
-    return 0;
-  else
-    return -1;
-}
+const char *ATTR_TYPE_NAME[] = {"undefined", "chars", "ints", "floats", "booleans"};
 
 const char *attr_type_to_string(AttrType type)
 {
-  if (type >= UNDEFINED && type <= DATES) {//增加范围
+  if (type >= UNDEFINED && type <= FLOATS) {
     return ATTR_TYPE_NAME[type];
   }
   return "unknown";
@@ -47,31 +37,15 @@ AttrType attr_type_from_string(const char *s)
   return UNDEFINED;
 }
 
-Value::Value(int val)
-{
-  set_int(val);
-}
+Value::Value(int val) { set_int(val); }
 
-Value::Value(float val)
-{
-  set_float(val);
-}
+Value::Value(float val) { set_float(val); }
 
-Value::Value(bool val)
-{
-  set_boolean(val);
-}
+Value::Value(bool val) { set_boolean(val); }
 
-Value::Value(const char *s, int len /*= 0*/)
-{
-  set_string(s, len);
-}
+Value::Value(const char *s, int len /*= 0*/) { set_string(s, len); }
 
-Value::Value(const char *year,const char *month,const char *day){
-  set_date(year,month,day);
-}
-
-void Value::set_data(char *data, int length)//赋值时增加类型
+void Value::set_data(char *data, int length)
 {
   switch (attr_type_) {
     case CHARS: {
@@ -79,20 +53,16 @@ void Value::set_data(char *data, int length)//赋值时增加类型
     } break;
     case INTS: {
       num_value_.int_value_ = *(int *)data;
-      length_ = length;
+      length_               = length;
     } break;
     case FLOATS: {
       num_value_.float_value_ = *(float *)data;
-      length_ = length;
+      length_                 = length;
     } break;
     case BOOLEANS: {
       num_value_.bool_value_ = *(int *)data != 0;
-      length_ = length;
+      length_                = length;
     } break;
-    case DATES:{
-      num_value_.int_value_ = *(int *)data;
-      length_ = length;
-    }break;
     default: {
       LOG_WARN("unknown data type: %d", attr_type_);
     } break;
@@ -100,22 +70,22 @@ void Value::set_data(char *data, int length)//赋值时增加类型
 }
 void Value::set_int(int val)
 {
-  attr_type_ = INTS;
+  attr_type_            = INTS;
   num_value_.int_value_ = val;
-  length_ = sizeof(val);
+  length_               = sizeof(val);
 }
 
 void Value::set_float(float val)
 {
-  attr_type_ = FLOATS;
+  attr_type_              = FLOATS;
   num_value_.float_value_ = val;
-  length_ = sizeof(val);
+  length_                 = sizeof(val);
 }
 void Value::set_boolean(bool val)
 {
-  attr_type_ = BOOLEANS;
+  attr_type_             = BOOLEANS;
   num_value_.bool_value_ = val;
-  length_ = sizeof(val);
+  length_                = sizeof(val);
 }
 void Value::set_string(const char *s, int len /*= 0*/)
 {
@@ -147,29 +117,8 @@ void Value::set_value(const Value &value)
     case UNDEFINED: {
       ASSERT(false, "got an invalid value type");
     } break;
-    // case DATES: {
-    //   set_date(value.get_date());
-    // } break;
   }
 }
-
-void Value::set_date(const char *year,const char *month,const char *day)
-{
-  attr_type_=DATES;
-  int y,m,d;
-  sscanf(year,"%d",&y);
-  sscanf(month,"%d",&m);
-  sscanf(day,"%d",&d);
-
-  if(0!=check_date(y,m,d)){
-    LOG_WARN("Error date:%d-%d-%d",y,m,d);
-    return;
-  }
-  int dv=10000*y+100*m+d;//转换为int类型，方便比较大小
-   num_value_.int_value_ =dv;
-   length_=sizeof(dv);
-}
-
 
 const char *Value::data() const
 {
@@ -183,7 +132,7 @@ const char *Value::data() const
   }
 }
 
-std::string Value::to_string() const//用于输出时转换格式
+std::string Value::to_string() const
 {
   std::stringstream os;
   switch (attr_type_) {
@@ -199,13 +148,6 @@ std::string Value::to_string() const//用于输出时转换格式
     case CHARS: {
       os << str_value_;
     } break;
-    case DATES:{
-      int y,m,d;
-      y=num_value_.int_value_/10000;
-      m=(num_value_.int_value_-y*10000)/100;
-      d=(num_value_.int_value_-y*10000-m*100);
-      os<<y<<"-"<<(m<10?"0":"")<<m<<"-"<<(d<10?"0":"")<<d;
-    }break;
     default: {
       LOG_WARN("unsupported attr type: %d", attr_type_);
     } break;
@@ -217,7 +159,6 @@ int Value::compare(const Value &other) const
 {
   if (this->attr_type_ == other.attr_type_) {
     switch (this->attr_type_) {
-      case DATES:
       case INTS: {
         return common::compare_int((void *)&this->num_value_.int_value_, (void *)&other.num_value_.int_value_);
       } break;
@@ -259,7 +200,6 @@ int Value::get_int() const
         return 0;
       }
     }
-    case DATES:
     case INTS: {
       return num_value_.int_value_;
     }
@@ -305,10 +245,7 @@ float Value::get_float() const
   return 0;
 }
 
-std::string Value::get_string() const
-{
-  return this->to_string();
-}
+std::string Value::get_string() const { return this->to_string(); }
 
 bool Value::get_boolean() const
 {
