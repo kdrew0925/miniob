@@ -146,7 +146,7 @@ void JavaThreadPoolThreadHandler::event_loop_thread()
 
 RC JavaThreadPoolThreadHandler::new_connection(Communicator *communicator)
 {
-  int fd = communicator->fd();
+  int fd = communicator->fd_();
   LOG_INFO("new connection. fd=%d", fd);
   EventCallbackAg *ag = new EventCallbackAg;
   ag->host = this;
