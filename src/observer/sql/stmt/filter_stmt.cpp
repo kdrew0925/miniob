@@ -12,10 +12,10 @@ See the Mulan PSL v2 for more details. */
 // Created by Wangyunlai on 2022/5/22.
 //
 
-#include "sql/stmt/filter_stmt.h"
-#include "common/lang/string.h"
-#include "common/log/log.h"
 #include "common/rc.h"
+#include "common/log/log.h"
+#include "common/lang/string.h"
+#include "sql/stmt/filter_stmt.h"
 #include "storage/db/db.h"
 #include "storage/table/table.h"
 
@@ -31,12 +31,11 @@ RC FilterStmt::create(Db *db, Table *default_table, std::unordered_map<std::stri
     const ConditionSqlNode *conditions, int condition_num, FilterStmt *&stmt)
 {
   RC rc = RC::SUCCESS;
-  stmt  = nullptr;
+  stmt = nullptr;
 
   FilterStmt *tmp_stmt = new FilterStmt();
   for (int i = 0; i < condition_num; i++) {
     FilterUnit *filter_unit = nullptr;
-
     rc = create_filter_unit(db, default_table, tables, conditions[i], filter_unit);
     if (rc != RC::SUCCESS) {
       delete tmp_stmt;
@@ -92,12 +91,18 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_m
   filter_unit = new FilterUnit;
 
   if (condition.left_is_attr) {
-    Table           *table = nullptr;
+    Table *table = nullptr;
     const FieldMeta *field = nullptr;
-    rc                     = get_table_and_field(db, default_table, tables, condition.left_attr, table, field);
+    rc = get_table_and_field(db, default_table, tables, condition.left_attr, table, field);
     if (rc != RC::SUCCESS) {
       LOG_WARN("cannot find attr");
       return rc;
+    }
+      // 检查两个类型是否能够比较
+      //判断右侧date是否合法
+    if(field->type()==AttrType::DATES&&condition.right_is_attr==false&&condition.right_value.get_int()==0)//属性在右侧或者未赋值成功
+    {
+      return RC::DATE_UNVALID;
     }
     FilterObj filter_obj;
     filter_obj.init_attr(Field(table, field));
@@ -109,12 +114,17 @@ RC FilterStmt::create_filter_unit(Db *db, Table *default_table, std::unordered_m
   }
 
   if (condition.right_is_attr) {
-    Table           *table = nullptr;
+    Table *table = nullptr;
     const FieldMeta *field = nullptr;
-    rc                     = get_table_and_field(db, default_table, tables, condition.right_attr, table, field);
+    rc = get_table_and_field(db, default_table, tables, condition.right_attr, table, field);
     if (rc != RC::SUCCESS) {
       LOG_WARN("cannot find attr");
       return rc;
+    }
+    //判断右侧date是否合法
+    if(field->type()==AttrType::DATES&&condition.left_is_attr==false&&condition.left_value.get_int()==0)//属性在左侧或者未赋值成功
+    {
+      return RC::DATE_UNVALID;
     }
     FilterObj filter_obj;
     filter_obj.init_attr(Field(table, field));
